@@ -8,11 +8,12 @@ Static site (no build step), deployed on Vercel from this repo. Backend: Supabas
 | `admin.html` | Owner dashboard (auto sign-out after 60 s of inactivity) |
 | `gallery.html` | Private client gallery page: `gallery.html#<private code>` |
 | `assets/` | Logo, favicon, founder photo |
-| `supabase/01_starter_content.sql` | Starter services, packages and 6 journal articles |
+| `supabase/starter_parts/01a…01h` | Starter services, packages and 6 journal articles in small parts (use these on a phone) |
+| `supabase/01_starter_content_ALL_IN_ONE.sql` | Same content as one big file (laptop only) |
 | `supabase/02_client_galleries.sql` | Private client galleries (tables, rules, storage) |
 
 ## Setup (once)
-1. Supabase → SQL Editor → run `01_starter_content.sql`, then `02_client_galleries.sql`.
+1. Supabase → SQL Editor → run the `starter_parts` files in order (01a, 01b … 01h), then `02_client_galleries.sql`.
 2. Make sure the owner's row in `profiles` has `role = 'owner'`.
 3. Open `/admin.html`, sign in, and edit everything from there.
 
