@@ -27,7 +27,11 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const slug=s=>(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'item';
 const pub=(b,p)=>`${U}/storage/v1/object/public/${b}/${p}`;
 const NAV=[['dashboard','Dashboard'],['media','Media library'],['galleries','Client galleries'],['homepage','Homepage'],['services','Services'],['packages','Packages'],['portfolio','Portfolio'],['blog','Journal'],['team','Team'],['reviews','Reviews'],['bookings','Bookings'],['enquiries','Enquiries'],['newsletter','Newsletter'],['sendnews','Send newsletter'],['settings','Settings']];
-function msg(t,bad){const m=$('#msg');if(m){m.textContent=t;m.style.color=bad?'#B42318':''}else if(bad)alert(t)}
+let toastT;function toast(t,bad){let b=$('#toast');if(!b){b=document.createElement('div');b.id='toast';b.setAttribute('role','status');b.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100;max-width:92vw;padding:13px 20px;border-radius:12px;color:#fff;font:600 14px Manrope;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:opacity .25s';document.body.appendChild(b)}
+ b.style.background=bad?'#B42318':'#067647';b.textContent=(bad?'':'✓ ')+t;b.style.opacity=1;b.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{b.style.opacity=0;setTimeout(()=>{b.style.display='none'},300)},bad?6000:2600)}
+let sbtn=null;function sbDone(bad){if(!sbtn)return;const {el,orig,t}=sbtn;sbtn=null;clearTimeout(t);el.disabled=false;if(bad){el.textContent=orig;return}el.textContent='SAVED ✓';setTimeout(()=>{el.textContent=orig},1800)}
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-a="save"],button[data-a="sset"],button[data-a="add"]');if(!b||b.disabled)return;sbDone(true);const orig=b.textContent;b.disabled=true;b.textContent=b.dataset.a==='add'?'ADDING…':'SAVING…';sbtn={el:b,orig,t:setTimeout(()=>sbDone(true),8000)}},true);
+function msg(t,bad){const m=$('#msg');if(m){m.textContent=t;m.style.color=bad?'#B42318':''}toast(t,bad);sbDone(bad)}
 async function uploadFile(bucket,file){
  if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm))$/.test(file.type))throw new Error('Only JPG, PNG, WebP, MP4 or WebM files are allowed.');
  if(file.size>(file.type.startsWith('video')?200:10)*1048576)throw new Error(file.name+' is too large (max 10 MB photos, 200 MB videos).');
@@ -82,7 +86,7 @@ async function dash(){const n=async(t,f)=>{let q=sb.from(t).select('*',{count:'e
  $('#view').innerHTML=`<h1>Dashboard</h1><p class="muted">Live numbers from your Lascot Studio database.</p><div class="cards">${R.map((r,i)=>`<div class="card"><span class="muted">${r[0]}</span><b>${V[i]}</b></div>`).join('')}</div>`}
 const GB='client-galleries',gLink=t=>new URL('gallery.html',location.href).href.replace(/#.*$/,'')+'#'+t,rnd=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,n),fmtSz=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round((n||0)/1024))+' KB';
 async function makeThumb(file){if(!file.type.startsWith('image/'))return null;try{const bm=await createImageBitmap(file),r=Math.min(1,720/Math.max(bm.width,bm.height)),c=document.createElement('canvas');c.width=Math.round(bm.width*r);c.height=Math.round(bm.height*r);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);bm.close&&bm.close();return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.8))}catch(e){return null}}
-function gMsg(t,bad){const m=$('#gmsg');if(m){m.textContent=t;m.style.color=bad?'#B42318':''}}
+function gMsg(t,bad){const m=$('#gmsg');if(m){m.textContent=t;m.style.color=bad?'#B42318':''}toast(t,bad);sbDone(bad)}
 async function galleriesPage(id){
  if(id)return galleryDetail(id);
  const {data,error}=await sb.from('client_galleries').select('*, gallery_photos(count)').order('created_at',{ascending:false}),rows=data||[];
@@ -159,8 +163,8 @@ async function boot(){const {data:{user}}=await sb.auth.getUser();if(!user)retur
  const {data:p}=await sb.from('profiles').select('role').eq('id',user.id).maybeSingle();
  if(p?.role!=='owner'){await sb.auth.signOut();$('#le').textContent='This account is not the site owner.';return}
  $('#login').style.display='none';$('#app').style.display='grid';route();poke()}
-$('#lf').onsubmit=async e=>{e.preventDefault();$('#le').textContent='';const {error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});
- if(error)return $('#le').textContent='Incorrect email or password.';boot()};
+$('#lf').onsubmit=async e=>{e.preventDefault();$('#le').textContent='';const bt=$('#lf button.p');bt.disabled=true;bt.textContent='SIGNING IN…';const {error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});
+ if(error){bt.disabled=false;bt.textContent='SIGN IN';return $('#le').textContent='Incorrect email or password.'}try{await boot()}finally{bt.disabled=false;bt.textContent='SIGN IN'}};
 $('#fp').onclick=async()=>{const m=$('#em').value;if(!m)return $('#le').textContent='Enter your email first.';
  const {error}=await sb.auth.resetPasswordForEmail(m);$('#le').textContent=error?'Could not send the reset email.':'If that email belongs to the owner, a reset link has been sent.'};
 $('#so').onclick=async()=>{await sb.auth.signOut();location.reload()};
