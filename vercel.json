@@ -1,6 +1,17 @@
 {
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/gallery", "destination": "/gallery.html" }
-  ]
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/gallery",
+      "destination": "/gallery.html"
+    }
+  ],
+  "functions": {
+    "api/newsletter-send.js": {
+      "maxDuration": 60
+    }
+  }
 }

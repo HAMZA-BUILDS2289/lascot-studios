@@ -23,3 +23,18 @@ Admin → Client galleries → create → upload photos → copy/email/WhatsApp 
 The link holds a 64-character random code. Only someone with the exact link can load the gallery,
 and they can download everything as zip file(s). Turn a link off or make a new one at any time.
 Note: photo file addresses are unguessable but not password-protected; treat the link like a key.
+
+## Email notifications (Gmail)
+Run `supabase/04_email_notifications.sql`, then add these in Vercel → Project → Settings → Environment Variables, and redeploy:
+
+| Name | Value |
+|---|---|
+| `GMAIL_USER` | Lascotstudios@gmail.com |
+| `GMAIL_APP_PASSWORD` | 16-character Google App Password (Google Account → Security → 2-Step Verification → App passwords) |
+| `SUPABASE_URL` | https://vapxkssbrggpuyfehqwi.supabase.co |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API Keys → secret key. **Never put this in the website files.** |
+| `SITE_URL` | https://lascot-studios.vercel.app |
+| `OWNER_NOTIFY_EMAIL` | (optional) where booking alerts go; defaults to GMAIL_USER |
+| `UNSUB_SECRET` | (optional) any long random text, used to sign unsubscribe links |
+
+Functions in `api/`: `booking-notify` (studio + customer emails), `newsletter-welcome`, `newsletter-send` (owner only, Admin → Send newsletter), `unsubscribe`.

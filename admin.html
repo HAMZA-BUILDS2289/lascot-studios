@@ -26,7 +26,7 @@ const sb=supabase.createClient(U,K,{auth:{storage:window.sessionStorage,persistS
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const slug=s=>(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'item';
 const pub=(b,p)=>`${U}/storage/v1/object/public/${b}/${p}`;
-const NAV=[['dashboard','Dashboard'],['media','Media library'],['galleries','Client galleries'],['homepage','Homepage'],['services','Services'],['packages','Packages'],['portfolio','Portfolio'],['blog','Journal'],['team','Team'],['reviews','Reviews'],['bookings','Bookings'],['enquiries','Enquiries'],['newsletter','Newsletter'],['settings','Settings']];
+const NAV=[['dashboard','Dashboard'],['media','Media library'],['galleries','Client galleries'],['homepage','Homepage'],['services','Services'],['packages','Packages'],['portfolio','Portfolio'],['blog','Journal'],['team','Team'],['reviews','Reviews'],['bookings','Bookings'],['enquiries','Enquiries'],['newsletter','Newsletter'],['sendnews','Send newsletter'],['settings','Settings']];
 function msg(t,bad){const m=$('#msg');if(m){m.textContent=t;m.style.color=bad?'#B42318':''}else if(bad)alert(t)}
 async function uploadFile(bucket,file){
  if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm))$/.test(file.type))throw new Error('Only JPG, PNG, WebP, MP4 or WebM files are allowed.');
@@ -130,8 +130,22 @@ async function galleryDetail(id){
   try{await Promise.all([work(),work(),work()])}finally{window.__busy--}
   if(errs.length)gMsg(errs.slice(0,3).join(' | '),1);if(done)await route()}}
 
+
+async function sendNewsPage(){
+ const {count}=await sb.from('newsletter_subscribers').select('*',{count:'exact',head:true}).eq('status','subscribed');
+ $('#view').innerHTML=`<h1>Send newsletter</h1><p class="muted">Write a message and it is emailed to everyone who subscribed (${count??0} people). Each email has an unsubscribe link. Gmail allows about 500 emails a day, so send to larger lists on separate days.</p>
+ <section class="row"><label>Subject<input id="nsub" maxlength="200" placeholder="e.g. New headshot packages for November"></label><label>Message<textarea id="nmsg" rows="10" placeholder="Write your message. Leave a blank line between paragraphs."></textarea></label>
+ <div class="bar" style="margin:0"><button class="btn" id="ntest">SEND A TEST TO MYSELF</button><button class="btn p" id="nall">SEND TO ALL ${count??0} SUBSCRIBERS</button></div><div id="nst" class="muted" role="status"></div></section>`;
+ const call=async body=>{const {data:{session}}=await sb.auth.getSession();const r=await fetch('/api/newsletter-send',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(session?.access_token||'')},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Could not send');return j};
+ const need=()=>{const subject=$('#nsub').value.trim(),message=$('#nmsg').value.trim();if(!subject||!message){$('#nst').textContent='Write a subject and a message first.';return null}return{subject,message}};
+ $('#ntest').onclick=async()=>{const b=need();if(!b)return;window.__busy=(window.__busy||0)+1;$('#nst').textContent='Sending test…';try{await call({...b,test:true});$('#nst').textContent='Test sent. Check your Gmail inbox (and spam).'}catch(x){$('#nst').textContent=x.message}finally{window.__busy--}};
+ $('#nall').onclick=async()=>{const b=need();if(!b)return;if(!count)return $('#nst').textContent='There are no subscribers yet.';if(!confirm(`Send this newsletter to ${count} subscribers now? This cannot be undone.`))return;
+  window.__busy=(window.__busy||0)+1;$('#nall').disabled=$('#ntest').disabled=true;let sent=0,failed=0,off=0;
+  try{for(;;){const j=await call({...b,offset:off});sent+=j.sent;failed+=j.failed;off=j.next;$('#nst').textContent=`Sent ${sent}${failed?`, ${failed} failed`:''}… please keep this page open.`;if(j.done)break}$('#nst').textContent=`Finished. ${sent} sent${failed?`, ${failed} failed`:''}.`}
+  catch(x){$('#nst').textContent=`Stopped after ${sent} sent: ${x.message}`}finally{window.__busy--;$('#nall').disabled=$('#ntest').disabled=false}}}
+
 async function route(){const [h,sub]=(location.hash||'#dashboard').slice(1).split('/');$$('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+h));
- $('#view').innerHTML='<p class="muted">Loading…</p>';const c=CFG[h];h==='galleries'?await galleriesPage(sub):h==='dashboard'||!c?await dash():c.forms?await settingsPage(c):await manager(c)}
+ $('#view').innerHTML='<p class="muted">Loading…</p>';const c=CFG[h];h==='galleries'?await galleriesPage(sub):h==='sendnews'?await sendNewsPage():h==='dashboard'||!c?await dash():c.forms?await settingsPage(c):await manager(c)}
 addEventListener('hashchange',route);
 $('#nav').innerHTML=NAV.map(([h,t])=>`<a href="#${h}">${t}</a>`).join('');
 const IDLE_MS=60000,WARN_MS=45000;let idleT,warnT,lastAct=Date.now();
