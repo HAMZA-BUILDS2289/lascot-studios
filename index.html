@@ -190,11 +190,7 @@ function hit(e){if(p<=.86)return null;const nx=e.clientX/W-.5,ny=.5-e.clientY/H;
 $('stage').addEventListener('pointermove',e=>{const h=hit(e);$('name').style.opacity=h?1:0;if(h){$('name').textContent=h.title||'View portfolio';$('name').style.transform=`translate(${e.clientX+14}px,${e.clientY+16}px)`;}});
 $('stage').addEventListener('click',e=>{if(e.target.closest('a,button'))return;if(hit(e))location.hash='#portfolio'});
 
-(()=>{if(matchMedia('(prefers-reduced-motion:reduce)').matches||scrollY>10||(location.hash&&location.hash!=='#home'))return;
- const max=$('track').offsetHeight-innerHeight;if(max<400||!cards.length)return;const to=max*.17,dur=4200;let t0=null,stop=false;const evs=['wheel','touchstart','keydown','pointerdown','mousedown'];
- const cancel=()=>{stop=true;evs.forEach(e=>removeEventListener(e,cancel))};evs.forEach(e=>addEventListener(e,cancel,{passive:true}));
- setTimeout(()=>requestAnimationFrame(function step(ts){if(stop)return;if(t0===null)t0=ts;const k=Math.min(1,(ts-t0)/dur);scrollTo(0,to*ease(k));if(k<1)requestAnimationFrame(step);else cancel()}),900)})();
-let trackH=1;(function loop(){if(cards.length){const prev=p;p+=(target-p)*.09;if(Math.abs(target-p)<.00005)p=target;
+let trackH=1,lastT=performance.now();(function loop(){if(cards.length){const now=performance.now(),dt=Math.min(.05,(now-lastT)/1000);lastT=now;const prev=p;p+=(target-p)*(1-Math.exp(-dt*10));if(Math.abs(target-p)<.0002)p=target;
  const th=$('track').offsetHeight;if(th>0)trackH=th;
  const off=document.hidden||document.body.classList.contains('sub')||scrollY>trackH;
  if(off){for(const c of cards)if(c.v&&!c.v.paused)c.v.pause();}
