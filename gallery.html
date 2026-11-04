@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your private gallery · Lascot Studio</title>
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--surface:#F5F8FF;--ink:#101828;--mid:#667085;--line:#E4EAF3;--accent:#023BE4;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#023BE4;--surface:rgba(255,255,255,.1);--ink:#fff;--mid:rgba(255,255,255,.76);--line:rgba(255,255,255,.26);--accent:#fff;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;font:500 16px Manrope,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;align-items:center;gap:12px;padding:18px 5vw;border-bottom:1px solid var(--line)}header img{width:36px;height:36px}header b{font:500 15px 'Space Grotesk';letter-spacing:.14em}
+main{padding:34px 5vw 70px;max-width:1500px;margin:auto}h1{font:500 clamp(30px,5vw,56px)/1.05 'Space Grotesk',sans-serif;letter-spacing:-.04em;margin:0 0 10px}.muted{color:var(--mid)}
+.msg{max-width:60ch;margin:12vh auto;text-align:center}.msg h1{font-size:34px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:22px 0 26px}
+.btn{display:inline-flex;align-items:center;height:46px;padding:0 24px;border-radius:99px;border:1px solid var(--ink);background:none;color:var(--ink);font:600 12px Manrope;letter-spacing:.08em;cursor:pointer;text-decoration:none}.btn.p{background:var(--accent);border-color:var(--accent);color:var(--bg)}.btn:disabled{opacity:.55;cursor:wait}
+.grid{columns:260px;column-gap:12px}.it{break-inside:avoid;margin:0 0 12px;position:relative;border-radius:12px;overflow:hidden;background:var(--surface);cursor:zoom-in}.it img,.it video{display:block;width:100%;height:auto}
+.it .dl{position:absolute;right:8px;bottom:8px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(16,24,40,.72);color:#fff;font-size:18px;cursor:pointer;opacity:0;transition:.2s}.it:hover .dl,.it:focus-within .dl{opacity:1}@media(hover:none){.it .dl{opacity:1}}
+#lb{position:fixed;inset:0;background:rgba(5,10,20,.94);display:none;align-items:center;justify-content:center;z-index:50}#lb.on{display:flex}#lb img,#lb video{max-width:94vw;max-height:84vh;border-radius:6px}
+#lb button{position:absolute;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:99px;height:44px;min-width:44px;padding:0 16px;font:600 13px Manrope;cursor:pointer}#lbx{top:16px;right:16px}#lbp{left:12px;top:50%}#lbn{right:12px;top:50%}#lbd{bottom:18px;left:50%;transform:translateX(-50%)}
+#prog{height:6px;border-radius:9px;background:var(--line);overflow:hidden;max-width:460px;display:none}#prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.note{font-size:13px;color:var(--mid);max-width:70ch}
+</style></head><body>
+<header><img src="assets/logo.png" alt="" width="36" height="36"><b>LASCOT STUDIO</b></header>
+<main id="m"><p class="muted" role="status">Opening your gallery…</p></main>
+<div id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer"><button id="lbx" aria-label="Close">✕</button><button id="lbp" aria-label="Previous">‹</button><button id="lbn" aria-label="Next">›</button><div id="lbc"></div><button id="lbd">DOWNLOAD</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+<script>
+const U='https://vapxkssbrggpuyfehqwi.supabase.co',K='sb_publishable_dqv7RhuBbqUpccJfX1H1QQ_mJ908tRk';
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let G=null,P=[],cur=0,busy=false;
+const url=p=>`${U}/storage/v1/object/public/${G.bucket}/${p.split('/').map(encodeURIComponent).join('/')}`;
+const safe=n=>String(n||'file').replace(/[\\/:*?"<>|]+/g,'-').trim()||'file';
+function fail(t,d){$('#m').innerHTML=`<div class="msg"><h1>${esc(t)}</h1><p class="muted">${esc(d)}</p></div>`}
+async function load(){
+ const tok=decodeURIComponent((location.hash||'').slice(1)).trim();
+ if(!/^[a-z0-9]{40,200}$/i.test(tok))return fail('This link is not complete','Please open the full link that Lascot Studio sent you. If you copied it, make sure the whole link was copied.');
+ let r;try{r=await fetch(`${U}/rest/v1/rpc/get_client_gallery`,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify({p_token:tok}),referrerPolicy:'no-referrer'})}catch(e){return fail('Could not connect','Please check your internet connection and refresh the page.')}
+ if(!r.ok)return fail('Something went wrong','The gallery could not be loaded right now. Please try again in a moment.');
+ G=await r.json();if(!G)return fail('This gallery is not available','The link may be wrong, switched off or expired. Please contact Lascot Studio and we will send you a new one.');
+ P=G.photos||[];document.title=G.title+' · Lascot Studio';render()}
+function render(){
+ const d=G.event_date?new Date(G.event_date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'',
+ total=P.reduce((a,p)=>a+(p.size||0),0),mb=(total/1048576).toFixed(total>10485760?0:1);
+ $('#m').innerHTML=`<h1>${esc(G.title)}</h1><p class="muted">${[G.client_name&&'Prepared for '+esc(G.client_name),d,P.length+' file'+(P.length===1?'':'s')].filter(Boolean).join(' · ')}</p>${G.message?`<p style="max-width:62ch">${esc(G.message)}</p>`:''}
+ ${P.length?`<div class="bar"><button class="btn p" id="all">DOWNLOAD ALL${total?` (${mb} MB)`:''}</button><div id="prog"><i></i></div><span id="st" class="muted" role="status"></span></div><p class="note">This gallery is private to you. Anyone who has this link can see and download these photographs, so please share the link only with people you trust.${total>190*1048576?' Because there are many files, they will download as several zip files.':''}</p>`:'<p class="muted">The photographs are not uploaded yet. Please check back soon.</p>'}
+ <div class="grid">${P.map((p,i)=>`<figure class="it" data-i="${i}" style="margin:0 0 12px">${p.kind==='video'?`<video src="${url(p.path)}#t=0.1" preload="metadata" muted playsinline></video>`:`<img loading="lazy" decoding="async" src="${url(p.thumb||p.path)}" alt="${esc(p.filename)}">`}<button class="dl" data-d="${i}" aria-label="Download ${esc(p.filename)}">↓</button></figure>`).join('')}</div>`;
+ $('#all')?.addEventListener('click',downloadAll)}
+function save(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000)}
+async function one(i){const p=P[i];try{const r=await fetch(url(p.path),{referrerPolicy:'no-referrer'});if(!r.ok)throw 0;save(await r.blob(),safe(p.filename))}catch(e){window.open(url(p.path),'_blank','noopener')}}
+async function downloadAll(){
+ if(busy)return;if(!window.JSZip)return alert('The download tool did not load. Please refresh the page and try again.');
+ busy=true;const btn=$('#all'),st=$('#st'),pg=$('#prog'),bar=pg.firstElementChild;btn.disabled=true;pg.style.display='block';
+ const LIMIT=180*1048576,base=safe(G.title).slice(0,60),used=new Set(),parts=[];let zip=new JSZip(),sz=0,n=0,part=1,bad=0;
+ const flush=async()=>{if(!n)return;st.textContent='Preparing zip file '+part+'…';const b=await zip.generateAsync({type:'blob',compression:'STORE',streamFiles:true});parts.push(b);save(b,`${base}-part${part}.zip`);part++;zip=new JSZip();sz=0;n=0;await new Promise(r=>setTimeout(r,900))};
+ try{for(let i=0;i<P.length;i++){const p=P[i];let name=safe(p.filename);if(used.has(name.toLowerCase())){const m=name.match(/^(.*?)(\.[^.]*)?$/);name=`${m[1]}-${i+1}${m[2]||''}`}used.add(name.toLowerCase());
+   st.textContent=`Downloading ${i+1} of ${P.length}…`;bar.style.width=Math.round(i/P.length*100)+'%';
+   try{const r=await fetch(url(p.path),{referrerPolicy:'no-referrer'});if(!r.ok)throw 0;const b=await r.blob();if(n&&sz+b.size>LIMIT)await flush();zip.file(name,b,{binary:true});sz+=b.size;n++}catch(e){bad++}}
+  await flush();bar.style.width='100%';
+  const single=parts.length===1;st.textContent=bad?`Done, but ${bad} file(s) could not be downloaded. Please try again for those.`:(single?'Done. Your zip file has been saved.':`Done. ${parts.length} zip files were saved. If some are missing, allow multiple downloads in your browser and try again.`)
+ }catch(e){st.textContent='The download was interrupted. Please try again, or download photos one at a time with the ↓ buttons.'}
+ busy=false;btn.disabled=false}
+const lb=$('#lb'),lbc=$('#lbc');
+function show(i){cur=(i+P.length)%P.length;const p=P[cur];lbc.innerHTML=p.kind==='video'?`<video src="${url(p.path)}" controls autoplay playsinline></video>`:`<img src="${url(p.path)}" alt="${esc(p.filename)}">`;lb.classList.add('on')}
+function hide(){lb.classList.remove('on');lbc.innerHTML=''}
+document.addEventListener('click',e=>{const d=e.target.closest('[data-d]');if(d){e.stopPropagation();return one(+d.dataset.d)}const it=e.target.closest('.it');if(it)show(+it.dataset.i)});
+$('#lbx').onclick=hide;$('#lbp').onclick=()=>show(cur-1);$('#lbn').onclick=()=>show(cur+1);$('#lbd').onclick=()=>one(cur);lb.addEventListener('click',e=>{if(e.target===lb)hide()});
+document.addEventListener('keydown',e=>{if(!lb.classList.contains('on'))return;if(e.key==='Escape')hide();if(e.key==='ArrowLeft')show(cur-1);if(e.key==='ArrowRight')show(cur+1)});
+addEventListener('hashchange',()=>location.reload());
+load();
+</script></body></html>
