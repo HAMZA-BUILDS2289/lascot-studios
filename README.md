@@ -11,6 +11,7 @@ Static site (no build step), deployed on Vercel from this repo. Backend: Supabas
 | `supabase/starter_parts/01a…01h` | Starter services, packages and 6 journal articles in small parts (use these on a phone) |
 | `supabase/01_starter_content_ALL_IN_ONE.sql` | Same content as one big file (laptop only) |
 | `supabase/02_client_galleries.sql` | Private client galleries (tables, rules, storage) |
+| `supabase/03_package_options.sql` | Package sample pictures and photo-count options (6 photos, 10 photos, custom) |
 
 ## Setup (once)
 1. Supabase → SQL Editor → run the `starter_parts` files in order (01a, 01b … 01h), then `02_client_galleries.sql`.
