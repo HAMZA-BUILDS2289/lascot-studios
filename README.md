@@ -38,3 +38,9 @@ Run `supabase/04_email_notifications.sql`, then add these in Vercel → Project 
 | `UNSUB_SECRET` | (optional) any long random text, used to sign unsubscribe links |
 
 Functions in `api/`: `booking-notify` (studio + customer emails), `newsletter-welcome`, `newsletter-send` (owner only, Admin → Send newsletter), `unsubscribe`.
+
+## Booking flow (confirm, deliver, review)
+Run `supabase/05_booking_flow.sql` once. Then deploy the updated `index.html`, `admin.html`, `api/booking-update.js` and `api/booking-notify.js`.
+- The booking form now asks for a preferred date and time.
+- Dashboard → Bookings: **Confirm booking** (pick the date, customer is emailed), **Mark as delivered** (customer is emailed a private review link), **Resend review request**.
+- Reviews written from that link arrive as *pending* in Dashboard → Reviews. Approve them to show them on the site.

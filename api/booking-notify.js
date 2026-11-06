@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
     const service = svc && svc[0] ? svc[0].name : '';
     const pack = pkg && pkg[0] ? pkg[0].name : '';
     const name = b.full_name || b.name || 'there';
-    const rows = [['Reference', b.reference], ['Name', name], ['Email', b.email], ['Phone', b.phone], ['Service', service], ['Package', pack], ['Photos chosen', b.photo_choice]].filter(r => r[1]);
+    const rows = [['Reference', b.reference], ['Name', name], ['Email', b.email], ['Phone', b.phone], ['Service', service], ['Package', pack], ['Preferred date', b.preferred_date], ['Preferred time', b.preferred_time], ['Photos chosen', b.photo_choice]].filter(r => r[1]);
     const table = `<table role="presentation" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:15px">${rows.map(r => `<tr><td style="color:#667085;padding-right:18px">${L.esc(r[0])}</td><td><b>${L.esc(r[1])}</b></td></tr>`).join('')}</table>`;
     const textRows = rows.map(r => `${r[0]}: ${r[1]}`).join('\n');
     const owner = L.env('OWNER_NOTIFY_EMAIL', L.env('GMAIL_USER'));
