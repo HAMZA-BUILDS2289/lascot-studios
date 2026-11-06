@@ -160,6 +160,7 @@ async function load(){
    if(Array.isArray(s)&&s[0])hero={...hero,...Object.fromEntries(Object.entries(s[0].value||{}).filter(([k,x])=>x!==null&&x!==''&&!(Array.isArray(x)&&!x.length)))};
   }catch(e){console.warn('Lascot hero: using defaults',e)}}
  return{items,hero};}
+$('logo').src=C.logo;
 const {items,hero}=await load();
 $('l1').firstChild.textContent=hero.l1;$('l2').firstChild.textContent=hero.l2;$('cap').textContent=hero.caption;$('sub').textContent=hero.sub;
 $('tags').innerHTML=hero.tags.map(t=>`<span>${t.replace(/[<>&]/g,'')}</span>`).join('<s>/</s>');
