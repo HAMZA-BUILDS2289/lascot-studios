@@ -107,12 +107,15 @@ footer.ft{margin:30px 3vw 3vw;border:1px solid var(--glb);border-radius:28px;bac
 .empty #cue{display:none}
 @media(max-width:760px){#cue{bottom:170px}}
 @media(prefers-reduced-motion:reduce){#cue svg{animation:none}}
-/* LIGHT: white and very glassy */
-:root{--bg:#FFFFFF;--ink:#0B1B4D;--mid:#5B6B8F;--line:rgba(11,27,77,.12);--ph:#eef2fb;--accent:#023BE4;--gl:rgba(255,255,255,.5);--gl2:rgba(255,255,255,.32);--glb:rgba(255,255,255,.95);--gsh:0 18px 50px rgba(30,60,130,.14),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.55);--surface:rgba(255,255,255,.55)}
-html{background:#f4f7fc}
-body{background:radial-gradient(800px 560px at 6% 4%,rgba(120,165,255,.24),transparent 62%),radial-gradient(760px 600px at 98% 16%,rgba(110,214,230,.22),transparent 60%),radial-gradient(900px 700px at 40% 104%,rgba(255,190,160,.16),transparent 62%),linear-gradient(180deg,#fbfcff,#f0f4fb);background-attachment:fixed}
-.pk,.rv,.toc,.faq details,.pfg,.steps div,.nl{background:linear-gradient(160deg,rgba(255,255,255,.82),rgba(255,255,255,.38))}
-#sh,.acts a,.acts button,#sth,#smb,#cue,.bot .r a.gb,footer.ft,.btn{background-image:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,.1))}
+/* LIGHT: pure white and very glassy */
+:root{--bg:#FFFFFF;--ink:#0B1B4D;--mid:#5B6B8F;--line:rgba(15,23,42,.10);--ph:#f1f3f7;--accent:#023BE4;--gl:rgba(255,255,255,.60);--gl2:rgba(255,255,255,.38);--glb:rgba(15,23,42,.08);--gsh:0 22px 60px rgba(15,23,42,.10),0 2px 8px rgba(15,23,42,.05),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.7);--surface:rgba(255,255,255,.6)}
+html{background:#fff}
+body{background:radial-gradient(720px 520px at 8% 6%,rgba(15,23,42,.05),transparent 62%),radial-gradient(720px 580px at 96% 18%,rgba(15,23,42,.04),transparent 60%),radial-gradient(900px 660px at 42% 104%,rgba(15,23,42,.05),transparent 62%),#ffffff;background-attachment:fixed}
+#sh{box-shadow:0 10px 34px rgba(15,23,42,.06)}
+.pk,.rv,.toc,.faq details,.pfg,.steps div,.nl{background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(255,255,255,.5));backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%)}
+#sh,.acts a,.acts button,#sth,#smb,#cue,.bot .r a.gb,footer.ft,.btn{background-image:linear-gradient(160deg,rgba(255,255,255,.7),rgba(255,255,255,.2))}
+.btn.p{box-shadow:0 12px 30px rgba(2,59,228,.28),inset 0 1px 0 rgba(255,255,255,.45)}
+:root:not([data-theme=dark]) .sec h1,:root:not([data-theme=dark]) .sec h2,:root:not([data-theme=dark]) .sec h3,:root:not([data-theme=dark]) main h1,:root:not([data-theme=dark]) main h2{color:var(--ink)}
 /* DARK: truly dark glass (no strong blue) */
 :root[data-theme=dark]{--bg:#070c1a;--ink:#F3F6FF;--mid:rgba(243,246,255,.72);--line:rgba(255,255,255,.16);--ph:#141d38;--accent:#8db8ff;--gl:rgba(255,255,255,.07);--gl2:rgba(255,255,255,.05);--glb:rgba(255,255,255,.17);--gsh:0 18px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.16);--surface:rgba(255,255,255,.07);background:#04070f}
 :root[data-theme=dark] body{background:radial-gradient(800px 560px at 6% 0%,rgba(60,110,255,.24),transparent 62%),radial-gradient(760px 600px at 100% 22%,rgba(40,190,210,.15),transparent 60%),radial-gradient(900px 700px at 40% 105%,rgba(100,70,210,.18),transparent 62%),linear-gradient(160deg,#04070f,#08112a 60%,#0a1633);background-attachment:fixed}
