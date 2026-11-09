@@ -7,6 +7,10 @@
     {
       "source": "/gallery",
       "destination": "/gallery.html"
+    },
+    {
+      "source": "/graduation",
+      "destination": "/graduation.html"
     }
   ],
   "functions": {
