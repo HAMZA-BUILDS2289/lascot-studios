@@ -34,24 +34,27 @@ async function loadBooking(reference) {
   const rows = await L.sb(`bookings?reference=eq.${encodeURIComponent(reference)}&select=*`);
   const b = rows && rows[0]; if (!b) return null;
   const [svc, pkg] = await Promise.all([
-    b.service_id ? L.sb(`services?id=eq.${b.service_id}&select=name`).catch(() => []) : [],
+    b.service_id ? L.sb(`services?id=eq.${b.service_id}&select=name,slug`).catch(() => []) : [],
     b.package_id ? L.sb(`service_packages?id=eq.${b.package_id}&select=*`).catch(() => []) : []]);
-  return { b, service: svc && svc[0] ? svc[0].name : '', pkg: pkg && pkg[0] || null };
+  return { b, service: svc && svc[0] ? svc[0].name : '', slug: svc && svc[0] ? svc[0].slug : '', pkg: pkg && pkg[0] || null };
 }
 
-// What can still be paid on this booking
-function plan(b, pkg, st) {
+// What can still be paid on this booking.
+// Graduation bookings: full payment only. Everything else: a deposit first, and the balance once the photos are delivered.
+function plan(b, pkg, st, slug) {
   const total = bookingTotalKobo(b, pkg), paid = Number(b.paid_kobo) || 0;
-  if (!total) return { total: null, paid, balance: null, options: [] };
-  const balance = Math.max(total - paid, 0), options = [];
+  if (!total) return { total: null, paid, balance: null, options: [], locked: false };
+  const grad = slug === 'graduation';
+  const balance = Math.max(total - paid, 0), options = []; let locked = false;
   if (balance >= MIN_KOBO) {
     if (paid === 0) {
       const dep = Math.round(total * st.deposit_percent / 100);
-      if (dep >= MIN_KOBO && balance - dep >= MIN_KOBO) options.push({ kind: 'deposit', amount: dep });
+      if (!grad && dep >= MIN_KOBO && balance - dep >= MIN_KOBO) options.push({ kind: 'deposit', amount: dep });
       options.push({ kind: 'full', amount: balance });
-    } else options.push({ kind: 'balance', amount: balance });
+    } else if (b.status === 'completed') options.push({ kind: 'balance', amount: balance });
+    else locked = true;
   }
-  return { total, paid, balance, options };
+  return { total, paid, balance, options, locked };
 }
 
 const verifySignature = (raw, sig) => {

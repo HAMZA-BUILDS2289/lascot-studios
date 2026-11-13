@@ -7,8 +7,8 @@ module.exports = async (req, res) => {
     if (!P.payConfigured() || !st.enabled) return L.json(res, 200, { enabled: false });
     const x = await P.loadBooking(ref);
     if (!x) return L.json(res, 404, { error: 'Booking not found' });
-    const pl = P.plan(x.b, x.pkg, st);
+    const pl = P.plan(x.b, x.pkg, st, x.slug);
     return L.json(res, 200, { enabled: true, first_name: String(x.b.full_name || x.b.name || '').split(' ')[0], service: x.service, package: x.pkg ? x.pkg.name : '', photo_choice: x.b.photo_choice || '',
-      total_kobo: pl.total, paid_kobo: pl.paid, balance_kobo: pl.balance, status: x.b.payment_status || 'unpaid', options: pl.options, deposit_percent: st.deposit_percent });
+      total_kobo: pl.total, paid_kobo: pl.paid, balance_kobo: pl.balance, status: x.b.payment_status || 'unpaid', locked: pl.locked, options: pl.options, deposit_percent: st.deposit_percent, locked: pl.locked });
   } catch (e) { return L.json(res, 500, { error: 'Something went wrong' }); }
 };

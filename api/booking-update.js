@@ -54,10 +54,11 @@ module.exports = async (req, res) => {
       if (!b.review_token) patch.review_token = token;
       patch.review_sent_at = new Date().toISOString();
       const link = `${L.SITE()}/#reviews/${token}`;
+      const owes = Number(b.paid_kobo) > 0 && b.payment_status !== 'paid' && b.reference, plink = `${L.SITE()}/pay.html?reference=${encodeURIComponent(b.reference || '')}`;
       mail = {
         subject: 'How was your session? · Lascot Studio',
-        text: `Hello ${name},\n\nYour ${service} is complete. Thank you for choosing Lascot Studio.\n\nWe would be grateful if you could share a short review. It takes a minute:\n${link}\n\nLascot Studio`,
-        html: L.layout('Thank you, ' + name, `<p style="margin:0 0 14px">Your <b>${L.esc(service)}</b> is complete. Thank you for choosing Lascot Studio.</p><p style="margin:0 0 18px">We would be grateful if you could share a short review. It takes about a minute.</p><p style="margin:0 0 18px"><a href="${link}" style="background:#023BE4;color:#fff;padding:12px 22px;border-radius:99px;text-decoration:none;font-weight:bold">Write a review</a></p><p style="margin:0;color:#667085;font-size:13px">Or open this link: ${L.esc(link)}</p>`)
+        text: `Hello ${name},\n\nYour ${service} is complete. Thank you for choosing Lascot Studio.\n\n${owes ? `Your photos are ready. Please pay the remaining balance here:\n${plink}\n\n` : ''}We would be grateful if you could share a short review. It takes a minute:\n${link}\n\nLascot Studio`,
+        html: L.layout('Thank you, ' + name, `<p style="margin:0 0 14px">Your <b>${L.esc(service)}</b> is complete. Thank you for choosing Lascot Studio.</p>${owes ? `<p style="margin:0 0 18px">Please pay the remaining balance: <a href="${plink}">${plink}</a></p>` : ''}<p style="margin:0 0 18px">We would be grateful if you could share a short review. It takes about a minute.</p><p style="margin:0 0 18px"><a href="${link}" style="background:#023BE4;color:#fff;padding:12px 22px;border-radius:99px;text-decoration:none;font-weight:bold">Write a review</a></p><p style="margin:0;color:#667085;font-size:13px">Or open this link: ${L.esc(link)}</p>`)
       };
     }
 

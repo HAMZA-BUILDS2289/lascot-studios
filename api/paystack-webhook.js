@@ -24,7 +24,7 @@ const handler = async (req, res) => {
       if (x && L.configured()) {
         const name = x.b.full_name || x.b.name || 'there', paid = P.naira(d.amount), total = x.pkg ? P.bookingTotalKobo(x.b, x.pkg) : null;
         const left = total ? Math.max(total - (Number(x.b.paid_kobo) || 0), 0) : null;
-        const line = left ? `Balance still to pay: ${P.naira(left)}.` : 'Your booking is fully paid.';
+        const line = left ? `Balance still to pay: ${P.naira(left)}, due once your photos are delivered. We will email you the link.` : 'Your booking is fully paid.';
         const owner = L.env('OWNER_NOTIFY_EMAIL', L.env('GMAIL_USER'));
         L.sendMail({ to: owner, replyTo: x.b.email || undefined, subject: `Payment received: ${paid} from ${name}`, text: `${name} paid ${paid} for booking ${x.b.reference} (${x.service}${x.pkg ? ' · ' + x.pkg.name : ''}).\n${line}\n\nOpen the dashboard: ${L.SITE()}/admin.html`, html: L.layout('Payment received', `<p>${L.esc(name)} paid <b>${L.esc(paid)}</b> for booking <b>${L.esc(x.b.reference)}</b> (${L.esc(x.service)}${x.pkg ? ' · ' + L.esc(x.pkg.name) : ''}).</p><p>${L.esc(line)}</p>`) }).catch(() => {});
         if (x.b.email) L.sendMail({ to: x.b.email, subject: `Payment received — thank you`, text: `Hello ${name},\n\nWe received your payment of ${paid} for booking ${x.b.reference}. ${line}\n\nWe will contact you to confirm your date.\n\nLascot Studio`, html: L.layout('Payment received', `<p>Hello ${L.esc(name)},</p><p>We received your payment of <b>${L.esc(paid)}</b> for booking <b>${L.esc(x.b.reference)}</b>. ${L.esc(line)}</p><p>We will contact you to confirm your date.</p>`) }).catch(() => {});

@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
     if (!x) return L.json(res, 404, { error: 'Booking not found.' });
     const email = String(x.b.email || '').trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return L.json(res, 422, { error: 'This booking has no valid email address.' });
-    const pl = P.plan(x.b, x.pkg, st), opt = pl.options.find(o => o.kind === kind);
+    const pl = P.plan(x.b, x.pkg, st, x.slug), opt = pl.options.find(o => o.kind === kind);
     if (!opt) return L.json(res, 409, { error: pl.total ? (pl.balance <= 0 ? 'This booking is already fully paid.' : 'That payment option is not available.') : 'The studio will send you a price for this booking.' });
     const ref = `LS-${x.b.reference}-${Date.now().toString(36)}-${crypto.randomBytes(2).toString('hex')}`;
     await L.sb('booking_payments', { method: 'POST', body: { booking_ref: x.b.reference, reference: ref, kind: opt.kind, amount_kobo: opt.amount }, prefer: 'return=minimal' });
