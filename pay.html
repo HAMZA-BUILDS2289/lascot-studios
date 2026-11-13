@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pay for your booking — Lascot Studio</title><meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("lascot-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}catch(e){document.documentElement.dataset.theme="light"}</script>
+<style>
+:root{--bg:#FFFFFF;--ink:#0B1B4D;--mid:#5B6B8F;--line:#D6E2FB;--ph:#EAF1FF;--accent:#023BE4;--on:#FFFFFF;color-scheme:light}
+:root[data-theme=dark]{--bg:#023BE4;--ink:#FFFFFF;--mid:rgba(255,255,255,.8);--line:rgba(255,255,255,.28);--ph:#2B5DF0;--accent:#FFFFFF;--on:#023BE4;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}html{background:var(--bg)}body{font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+header{display:flex;align-items:center;gap:10px;padding:14px max(16px,4vw);border-bottom:1px solid var(--line);font:600 15px 'Space Grotesk';letter-spacing:.12em}header img{width:34px;height:34px}header a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+main{max-width:520px;margin:0 auto;padding:clamp(28px,6vw,64px) max(16px,5vw)}
+h1{font:500 clamp(30px,6vw,44px)/1.05 'Space Grotesk',sans-serif;letter-spacing:-.04em;margin-bottom:8px}.muted{color:var(--mid)}
+.card{border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:22px;display:grid;gap:10px}.row{display:flex;justify-content:space-between;gap:14px}.row b{font-family:'Space Grotesk'}
+.btn{display:block;width:100%;text-align:center;border:1px solid var(--ink);padding:14px 20px;border-radius:999px;font:600 13px Manrope;letter-spacing:.08em;cursor:pointer;background:none;color:var(--ink);text-decoration:none}.btn.p{background:var(--accent);color:var(--on);border-color:var(--accent)}.btn[disabled]{opacity:.6;cursor:wait}
+.err{color:#B42318;font-weight:600}[data-theme=dark] .err{color:#FFD7D2}.ok{font-size:44px}
+</style></head><body>
+<header><a href="/"><img src="assets/logo.png" alt="">LASCOT STUDIO</a></header>
+<main id="m"><h1>Your booking</h1><p class="muted">Loading…</p></main>
+<script>(()=>{
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const N=k=>'₦'+(Number(k)/100).toLocaleString('en-NG',{maximumFractionDigits:2});
+const qs=new URLSearchParams(location.search),ref=(qs.get('reference')||'').trim(),back=qs.has('trxref')||qs.has('reference')&&qs.has('trxref');
+const info=async()=>{const r=await fetch('/api/pay-info?reference='+encodeURIComponent(ref),{cache:'no-store'});if(r.status===404)return{missing:true};if(!r.ok)throw 0;return r.json()};
+const lbl={deposit:'Pay deposit',full:'Pay full amount',balance:'Pay the balance'};
+function draw(d){
+ if(d.missing)return $('#m').innerHTML='<h1>Booking not found</h1><p class="muted">Check the link, or contact the studio.</p><p style="margin-top:20px"><a class="btn" href="/">BACK TO THE SITE</a></p>';
+ if(!d.enabled)return $('#m').innerHTML='<h1>Online payment is not available</h1><p class="muted">Please contact the studio to arrange payment.</p><p style="margin-top:20px"><a class="btn" href="/#contact">CONTACT THE STUDIO</a></p>';
+ const done=d.total_kobo&&d.balance_kobo<=0;
+ $('#m').innerHTML=`${done?'<div class="ok">✓</div>':''}<h1>${done?'Payment received':'Pay for your booking'}</h1><p class="muted">${esc(d.first_name?'Hello '+d.first_name+'. ':'')}${done?'Thank you. We will contact you to confirm your date.':'Booking reference '+esc(ref)}</p>
+ <div class="card">${d.service?`<div class="row"><span class="muted">Service</span><b>${esc(d.service)}</b></div>`:''}${d.package?`<div class="row"><span class="muted">Package</span><b>${esc(d.package)}</b></div>`:''}${d.photo_choice?`<div class="row"><span class="muted">Choice</span><b>${esc(d.photo_choice)}</b></div>`:''}
+ ${d.total_kobo?`<div class="row"><span class="muted">Total price</span><b>${N(d.total_kobo)}</b></div><div class="row"><span class="muted">Paid so far</span><b>${N(d.paid_kobo)}</b></div><div class="row"><span class="muted">Balance</span><b>${N(d.balance_kobo)}</b></div>`:'<p class="muted">The studio will send you the price for this booking, so it cannot be paid online yet.</p>'}</div>
+ ${d.options.length?`<div style="display:grid;gap:10px;margin-top:18px">${d.options.map((o,i)=>`<button class="btn ${i===0?'p':''}" data-k="${o.kind}">${lbl[o.kind]} · ${N(o.amount)}</button>`).join('')}</div><p class="muted" id="pe" role="alert" style="margin-top:10px"></p><p class="muted" style="margin-top:14px;font-size:14px">You will pay securely on Paystack with your card or bank.${d.options.some(o=>o.kind==='deposit')?` The deposit is ${d.deposit_percent}% of the price. You pay the rest later.`:''}</p>`:''}
+ <p style="margin-top:20px"><a class="btn" href="/">BACK TO THE SITE</a></p>`;
+ document.querySelectorAll('[data-k]').forEach(b=>b.onclick=async()=>{b.disabled=true;$('#pe').textContent='Opening Paystack…';try{const r=await fetch('/api/pay-init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reference:ref,kind:b.dataset.k})}),j=await r.json();if(!r.ok||!j.url)throw new Error(j.error||'');location.href=j.url}catch(e){b.disabled=false;$('#pe').className='err';$('#pe').textContent=e.message||'Could not start the payment. Please try again.'}});
+}
+(async()=>{try{if(!ref)return draw({missing:true});let d=await info();
+ if(back&&d.enabled&&d.status==='unpaid'||back&&d.enabled&&d.balance_kobo>0&&d.status==='deposit_paid'&&false){$('#m').innerHTML='<h1>Confirming your payment…</h1><p class="muted">This takes a few seconds. Please do not close this page.</p>';for(let i=0;i<12&&d.status==='unpaid';i++){await new Promise(r=>setTimeout(r,2500));d=await info()}}
+ draw(d)}catch{$('#m').innerHTML='<h1>Something went wrong</h1><p class="muted">Please refresh the page.</p>'}})();
+})();</script></body></html>
