@@ -43,8 +43,35 @@ footer{padding:36px max(16px,6vw) 48px;border-top:1px solid var(--line);display:
 #bk .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}#bk .po{display:grid;gap:8px}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}#lb.on{display:flex}#lb img{max-height:92vh;max-width:96vw;object-fit:contain;border-radius:8px}
 #lb button{position:absolute;top:14px;right:18px;background:none;border:0;color:#fff;font-size:34px;cursor:pointer}
+
+/* GLASS LOOK: same as the main site */
+:root{--bg:#f4f5ff;--ink:#0B1B4D;--mid:#5B6B8F;--line:rgba(15,23,42,.10);--ph:#f1f3f7;--accent:#023BE4;--gl:rgba(255,255,255,.6);--glb:rgba(15,23,42,.08);--gsh:0 22px 60px rgba(15,23,42,.10),0 2px 8px rgba(15,23,42,.05),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.7)}
+:root[data-theme=dark]{--bg:#2b2f45;--ink:#FFFFFF;--mid:rgba(255,255,255,.8);--line:rgba(255,255,255,.22);--ph:#3b4060;--accent:#dfe6ff;--gl:rgba(255,255,255,.16);--glb:rgba(255,255,255,.34);--gsh:0 14px 40px rgba(10,14,40,.28),inset 0 1px 0 rgba(255,255,255,.35)}
+html,html[data-theme=dark]{background-color:#f5f6ff;background-image:radial-gradient(70% 360px at 0% 120px,rgba(110,130,255,.34),transparent 72%),radial-gradient(60% 320px at 100% 260px,rgba(170,150,255,.26),transparent 72%),radial-gradient(80% 420px at 30% 640px,rgba(120,150,255,.20),transparent 72%),linear-gradient(180deg,#eceeff,#f6f7ff 55%,#eef1ff);background-size:100% 1100px;background-repeat:repeat-y}
+html[data-theme=dark]{background-color:#2b2f45;background-image:radial-gradient(70% 360px at 0% 120px,rgba(140,160,255,.42),transparent 72%),radial-gradient(60% 320px at 100% 260px,rgba(190,160,255,.30),transparent 72%),radial-gradient(80% 420px at 30% 640px,rgba(130,170,255,.24),transparent 72%),linear-gradient(180deg,#343a5c,#2b2f45 55%,#323757)}
+body{background:transparent!important}
+header{background:var(--gl);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);border-bottom:1px solid var(--glb);box-shadow:0 8px 30px rgba(20,70,190,.10)}
+:root[data-theme=dark] header{background:rgba(60,66,100,.45)}
+.pk,.empty,.card,.steps div,#bk .bx{background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(255,255,255,.5));border:1px solid var(--glb);border-radius:22px;box-shadow:var(--gsh);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}
+:root[data-theme=dark] .pk,:root[data-theme=dark] .empty,:root[data-theme=dark] .card,:root[data-theme=dark] .steps div,:root[data-theme=dark] #bk .bx{background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.05))}
+.steps div{padding:18px}.empty{border-style:solid}.pk.f{border-color:rgba(2,59,228,.35);border-width:1px}:root[data-theme=dark] .pk.f{border-color:rgba(255,255,255,.55)}
+section{border-top:1px solid var(--line)}
+footer{border-top:1px solid var(--line)}
+#bk{background:rgba(5,10,40,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#bk input,#bk select{background:var(--gl);border:1px solid var(--glb);box-shadow:inset 0 1px 0 rgba(255,255,255,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+:root[data-theme=dark] #bk select option{color:#0B1B4D}
+.btn,#theme{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(160deg,rgba(255,255,255,.42),rgba(255,255,255,.10));backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 30px rgba(2,59,228,.14),inset 0 1px 1px #fff,inset 0 -8px 16px rgba(2,59,228,.07),inset 0 0 0 1px rgba(2,59,228,.07);color:#023BE4;text-shadow:0 1px 0 rgba(255,255,255,.95),0 0 14px rgba(255,255,255,.7);transition:background .25s,transform .2s}
+.btn.p{font-weight:700;background:linear-gradient(160deg,rgba(255,255,255,.42),rgba(255,255,255,.10));color:#023BE4;border-color:rgba(255,255,255,.9)}
+.btn::before,#theme::before{content:"";position:absolute;left:3%;right:3%;top:1px;height:48%;border-radius:99px 99px 60% 60%/99px 99px 24px 24px;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0));pointer-events:none;z-index:-1}
+.btn:hover,#theme:hover{background:linear-gradient(160deg,rgba(255,255,255,.6),rgba(255,255,255,.2));transform:translateY(-1px)}
+:root[data-theme=dark] .btn,:root[data-theme=dark] .btn.p,:root[data-theme=dark] #theme{background:linear-gradient(160deg,rgba(255,255,255,.28),rgba(255,255,255,.08));border-color:rgba(255,255,255,.4);box-shadow:0 10px 26px rgba(10,14,40,.3),inset 0 1px 1px rgba(255,255,255,.55);color:#fff;text-shadow:0 0 14px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.4)}
+:root[data-theme=dark] .btn::before,:root[data-theme=dark] #theme::before{background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,0))}
+:root[data-theme=dark] .btn:hover,:root[data-theme=dark] .btn.p:hover,:root[data-theme=dark] #theme:hover{background:linear-gradient(160deg,rgba(255,255,255,.24),rgba(255,255,255,.06));color:#fff}
+#bk .x{background:none;border:0;box-shadow:none;backdrop-filter:none;text-shadow:none;color:var(--ink);width:auto;height:auto}#bk .x::before{display:none}
+#theme{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border-radius:99px;font-size:0}#theme svg{position:absolute;width:16px;height:16px;transition:transform .5s,opacity .3s}
+:root[data-theme=dark] .sun{opacity:0;transform:rotate(90deg) scale(.4)}:root:not([data-theme=dark]) .moon{opacity:0;transform:rotate(-90deg) scale(.4)}
 </style></head><body>
-<header><a class="logo" href="/"><img src="assets/logo.png" alt="Lascot Studio logo">LASCOT STUDIO</a><nav><a class="hm" href="/">Main site</a><a href="#packages">Packages</a><a class="sm" href="#samples">Samples</a><button id="theme" aria-label="Switch theme">◐</button></nav></header>
+<header><a class="logo" href="/"><img src="assets/logo.png" alt="Lascot Studio logo">LASCOT STUDIO</a><nav><a class="hm" href="/">Main site</a><a href="#packages">Packages</a><a class="sm" href="#samples">Samples</a><button id="theme" aria-label="Switch theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></button></nav></header>
 <main id="m"><div class="wrap hero"><small>LASCOT STUDIO</small><h1>Graduation</h1><p class="lead">Loading…</p></div></main>
 <footer id="ft"></footer>
 <div id="bk" role="dialog" aria-label="Book this package"><div class="bx" id="bx"></div></div>
