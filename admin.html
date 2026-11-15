@@ -266,13 +266,13 @@ async function paymentsPage(){
  v.innerHTML=`<h1>Payments</h1><p class="muted">Customers can pay a deposit or the full price by card or bank transfer. The money goes straight into your own Paystack account.</p>
  <div class="row"><label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="pon" ${on?'checked':''}> Accept online payments</label>
  <label>Deposit percentage (what the customer pays first)<input id="ppc" type="number" min="1" max="99" value="${pct}"></label>
- <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="pac" ${cfg.auto_confirm===true?'checked':''}> Confirm a booking automatically once it is paid (uses the date the customer chose)</label>
+ <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="pac" ${cfg.auto_confirm!==false?'checked':''}> Confirm a booking automatically once it is paid (uses the date the customer chose)</label>
  <div class="bar" style="margin:0"><button class="btn p" id="psave">SAVE</button><button class="btn" id="pchk">CHECK FOR MISSED PAYMENTS</button><span id="msg" class="muted" role="status"></span></div></div>
  <h2 style="margin:22px 0 6px">Received so far: ${NG(tot)}</h2><p class="muted">Last 100 payments. Paystack fees are taken off before the money reaches your bank.</p>
  ${error?`<div class="row err">${esc(error.message)}</div>`:''}${(pay||[]).length?'':'<div class="row muted">No payments yet.</div>'}
  ${(pay||[]).map(p=>`<div class="row"><strong>${NG(p.amount_kobo)}</strong> · ${esc(KL[p.kind]||p.kind)} · <b style="color:${p.status==='paid'?'#067647':'#b54708'}">${p.status==='paid'?'PAID':'NOT COMPLETED'}</b><div class="muted">Booking ${esc(p.booking_ref)} · ${esc(fd(p.paid_at||p.created_at))}</div></div>`).join('')}`;
  $('#psave').onclick=async()=>{const n=Math.round(+$('#ppc').value);if(!(n>=1&&n<=99))return msg('Deposit must be between 1 and 99.',1);const {error}=await sb.from('website_settings').upsert({key:'payments',value:{enabled:$('#pon').checked,deposit_percent:n,auto_confirm:$('#pac').checked},updated_at:new Date().toISOString()});msg(error?error.message:'Saved.',!!error)};
- $('#pchk').onclick=async e=>{e.target.disabled=true;msg('Checking Paystack…');try{const j=await checkPayments();msg(j.recorded?j.recorded+' missed payment'+(j.recorded>1?'s':'')+' found and recorded.':'Nothing missing. All payments are up to date.');if(j.recorded)await route()}catch(x){msg(x.message,1)}finally{e.target.disabled=false}}
+ $('#pchk').onclick=async e=>{e.target.disabled=true;msg('Checking Paystack…');try{const j=await checkPayments();msg(j.recorded?j.recorded+' missed payment'+(j.recorded>1?'s':'')+' found and recorded.':(j.checked?'Checked '+j.checked+' unfinished payment'+(j.checked>1?'s':'')+'. None were paid: '+(j.results||[]).map(x=>({not_successful:'Paystack says it was not completed',unknown:'not one of ours'}[x.outcome]||x.outcome)).join('; ')+'.':'Nothing missing. All payments are up to date.'));if(j.recorded)await route()}catch(x){msg(x.message,1)}finally{e.target.disabled=false}}
 }
 async function graduationPage(){
  const v=$('#view'),NM='Graduation';

@@ -12,7 +12,7 @@ async function settings() {
   let v = {};
   try { const r = await L.sb('website_settings?key=eq.payments&select=value'); v = (r && r[0] && r[0].value) || {}; } catch { /* defaults */ }
   const pct = Number(v.deposit_percent);
-  return { enabled: v.enabled !== false, deposit_percent: pct >= 1 && pct <= 99 ? Math.round(pct) : 50, auto_confirm: v.auto_confirm === true };
+  return { enabled: v.enabled !== false, deposit_percent: pct >= 1 && pct <= 99 ? Math.round(pct) : 50, auto_confirm: v.auto_confirm !== false };
 }
 
 // Price of a booking in kobo, worked out from the package and the photo choice the customer made. null = studio to quote.

@@ -62,7 +62,11 @@ function draw(d){
  <p style="margin-top:20px"><a class="btn" href="/">BACK TO THE SITE</a></p>`;
  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=async()=>{b.disabled=true;$('#pe').textContent='Opening Paystack…';try{const r=await fetch('/api/pay-init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reference:ref,kind:b.dataset.k})}),j=await r.json();if(!r.ok||!j.url)throw new Error(j.error||'');location.href=j.url}catch(e){b.disabled=false;$('#pe').className='err';$('#pe').textContent=e.message||'Could not start the payment. Please try again.'}});
 }
-(async()=>{try{if(!ref)return draw({missing:true});if(back){$('#m').innerHTML='<h1>Confirming your payment…</h1><p class="muted">This takes a few seconds. Please do not close this page.</p>';try{await fetch('/api/pay-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reference:ref})})}catch(e){}}let d=await info();
- if(back&&d.enabled&&d.status==='unpaid'||back&&d.enabled&&d.balance_kobo>0&&d.status==='deposit_paid'&&false){$('#m').innerHTML='<h1>Confirming your payment…</h1><p class="muted">This takes a few seconds. Please do not close this page.</p>';for(let i=0;i<12&&d.status==='unpaid';i++){await new Promise(r=>setTimeout(r,2500));d=await info()}}
+(async()=>{try{if(!ref)return draw({missing:true});
+ const verify=async()=>{try{await fetch('/api/pay-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reference:ref})})}catch(e){}};
+ const settle=async()=>{$('#m').innerHTML='<h1>Confirming your payment…</h1><p class="muted">This takes a few seconds. Please do not close this page, and do not pay again.</p>';let d=null;for(let i=0;i<8;i++){await verify();d=await info();if(d.missing||!d.enabled||d.status!=='unpaid')return d;await new Promise(r=>setTimeout(r,2500))}return d};
+ let d;
+ if(back){d=await settle();if(d.status==='unpaid'&&d.enabled&&!d.missing){$('#m').innerHTML='<h1>We are still confirming your payment</h1><p class="muted">If Paystack took the money, you do not need to pay again. Booking reference <b>'+esc(ref)+'</b>. Tap the button to check again, or contact the studio with this reference.</p><div style="display:grid;gap:10px;margin-top:18px"><button class="btn p" id="again">CHECK AGAIN</button><a class="btn" href="/#contact">CONTACT THE STUDIO</a></div>';$('#again').onclick=()=>location.reload();return}}
+ else d=await info();
  draw(d)}catch{$('#m').innerHTML='<h1>Something went wrong</h1><p class="muted">Please refresh the page.</p>'}})();
 })();</script></body></html>

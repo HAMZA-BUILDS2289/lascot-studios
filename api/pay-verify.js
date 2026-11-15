@@ -17,8 +17,8 @@ module.exports = async (req, res) => {
       if (!ref || typeof ref !== 'string' || ref.length > 60 || !/^[\w-]+$/.test(ref)) return L.json(res, 400, { error: 'Missing reference' });
       q = `booking_payments?booking_ref=eq.${encodeURIComponent(ref)}&status=neq.paid&created_at=gte.${encodeURIComponent(new Date(Date.now() - 3 * 864e5).toISOString())}&select=reference&order=created_at.desc&limit=5`;
     }
-    const rows = await L.sb(q) || [], found = [];
-    for (const r of rows) { const out = await S.settle(r.reference).catch(() => 'error'); if (out === 'ok') found.push(r.reference); }
-    return L.json(res, 200, { ok: true, checked: rows.length, recorded: found.length });
+    const rows = await L.sb(q) || [], found = [], results = [];
+    for (const r of rows) { let out; try { out = await S.settle(r.reference); } catch (e) { out = 'error: ' + String(e && e.message || e).slice(0, 160); } if (out === 'ok') found.push(r.reference); results.push({ reference: r.reference, outcome: out }); }
+    return L.json(res, 200, { ok: true, checked: rows.length, recorded: found.length, results });
   } catch (e) { console.error(e); return L.json(res, 500, { error: 'Could not check payments.' }); }
 };

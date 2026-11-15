@@ -48,5 +48,5 @@ Run `supabase/05_booking_flow.sql` once. Then deploy the updated `index.html`, `
 ## Missed payments, "waiting for confirmation" emails, auto-confirm
 - A payment is now recorded in three ways: Paystack's webhook, when the customer returns from Paystack (`api/pay-verify.js`), and a check the dashboard runs when you open Bookings (or press **Check for missed payments** on the Payments page). No SQL to run.
 - The customer's emails say what they booked and that it is **waiting for confirmation**.
-- Dashboard → Payments → **Confirm a booking automatically once it is paid** (off by default). It uses the date the customer chose.
+- Dashboard → Payments → **Confirm a booking automatically once it is paid** (on by default). It uses the date the customer chose.
 - In Paystack, make sure the webhook address is `https://<your-site>/api/paystack-webhook` (Paystack lets one account have only one webhook address per mode).
