@@ -44,9 +44,9 @@ module.exports = async (req, res) => {
       try {
         await L.sendMail({
           to: b.email,
-          subject: 'We received your booking request · Lascot Studio',
-          text: `Hello ${name},\n\nThank you for your booking request. It is not confirmed yet. We will contact you shortly to agree the details.\n\n${textRows}\n\nLascot Studio`,
-          html: L.layout('Thank you, ' + name, `<p style="margin:0 0 14px">We have received your booking request. <b>It is not confirmed yet.</b> We will get in touch shortly to agree the details with you.</p>${table}<p style="margin:20px 0 0;color:#667085;font-size:14px">If anything above is wrong, just reply to this email.</p>`, 'Lascot Studio · Monday to Saturday, 8:00 AM – 5:00 PM')
+          subject: `You booked ${service || 'a session'} with Lascot Studio · waiting for confirmation`,
+          text: `Hello ${name},\n\nYou booked ${service || 'a session'} with Lascot Studio. Status: WAITING FOR CONFIRMATION. We will email you as soon as it is confirmed.\n\n${textRows}\n\nLascot Studio`,
+          html: L.layout('Thank you, ' + name, `<p style="margin:0 0 14px">You booked <b>${L.esc(service || 'a session')}</b> with Lascot Studio. Status: <b>waiting for confirmation</b>. We will email you as soon as it is confirmed.</p>${table}<p style="margin:20px 0 0;color:#667085;font-size:14px">If anything above is wrong, just reply to this email.</p>`, 'Lascot Studio · Monday to Saturday, 8:00 AM – 5:00 PM')
         });
         results.customer = true;
       } catch (e) { console.error('customer email failed', e.message); }
