@@ -9,6 +9,18 @@
       "destination": "/gallery.html"
     },
     {
+      "source": "/grad",
+      "destination": "/graduation.html"
+    },
+    {
+      "source": "/Grad",
+      "destination": "/graduation.html"
+    },
+    {
+      "source": "/GRAD",
+      "destination": "/graduation.html"
+    },
+    {
       "source": "/graduation",
       "destination": "/graduation.html"
     }
