@@ -285,7 +285,7 @@ async function graduationPage(){
  const pkgs=pk||[],pics=ph||[],money=n=>n?'₦'+Number(n).toLocaleString('en-NG'):'';
  v.innerHTML=`<h1>Graduation page</h1><p class="muted">Everything on your graduation page is edited here. People open it at your website address followed by <b>/grad</b>. <a href="/grad" target="_blank" rel="noopener">Open the page ↗</a></p><span id="msg" class="muted" role="status"></span>
  <div class="row" id="gint"><strong>Introduction</strong><div class="fields"><label>Short introduction shown at the top of the page<textarea id="gsum" rows="3">${esc(svc.summary||'')}</textarea></label><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="gpub" ${svc.published?'checked':''}> Show Graduation in the website</label></div><div class="bar" style="margin:0"><button class="btn p" id="gsave">SAVE</button></div></div>
- <h2 style="margin:26px 0 6px">Packages and prices</h2><p class="muted">Each package shows on the page with its price and a button to book on WhatsApp.</p>
+ <h2 style="margin:26px 0 6px">Packages and prices</h2><p class="muted">Changes save by themselves a moment after you stop typing, and show on your website and in Packages straight away. No need to press Save.</p>
  <div class="bar"><button class="btn p" id="gadd">+ ADD A PACKAGE</button></div>
  ${pkgs.length?'':'<div class="row muted">No packages yet. Press + ADD A PACKAGE.</div>'}
  ${pkgs.map(p=>`<div class="row" data-pid="${p.id}"><strong>${esc(p.name||'Package')} ${p.price_ngn?'· '+money(p.price_ngn):''}</strong><div class="fields">
@@ -296,7 +296,7 @@ async function graduationPage(){
   <label>Number-of-photos choices (optional, one per line as: label | price)<textarea data-f="photo_options" rows="3" placeholder="10 photos | 30000&#10;20 photos | 50000">${esc((Array.isArray(p.photo_options)?p.photo_options:[]).map(o=>(o.label||'')+' | '+(o.price??'')).join('\n'))}</textarea></label>
   <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-f="featured" ${p.featured?'checked':''}> Mark as most popular</label>
   <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-f="available" ${p.available!==false?'checked':''}> Available to book</label></div>
-  <div class="bar" style="margin:0"><button class="btn p" data-a="psave">SAVE</button><button class="btn" data-a="pdel">DELETE</button></div></div>`).join('')}
+  <div class="bar" style="margin:0"><button class="btn p" data-a="psave">SAVE NOW</button><button class="btn" data-a="pdel">DELETE</button><span class="sv muted" role="status">Changes save by themselves.</span></div></div>`).join('')}
  <h2 style="margin:26px 0 6px">Sample pictures</h2><p class="muted">Upload your graduation photos. They appear in the Samples part of the page. JPG, PNG or WebP.</p>
  <div class="bar"><label class="btn p" style="cursor:pointer">+ UPLOAD GRADUATION PHOTOS<input hidden id="gup" type="file" multiple accept="image/jpeg,image/png,image/webp"></label></div>
  ${pics.length?'':'<div class="row muted">No graduation pictures yet.</div>'}
@@ -304,15 +304,22 @@ async function graduationPage(){
  $('#gsave').onclick=async()=>{const {error}=await sb.from('services').update({summary:$('#gsum').value.trim(),published:$('#gpub').checked}).eq('id',svc.id);error?msg('Could not save: '+error.message,1):msg('Saved.')};
  $('#gadd').onclick=async()=>{const {error}=await sb.from('service_packages').insert({service_id:svc.id,name:'New package',available:true});error?msg(error.message,1):(await route(),msg('Added. Fill it in, then press Save.'))};
  $('#gup').onchange=async e=>{const fs=[...e.target.files];let ok=0;for(const file of fs){try{if(!/^image\//.test(file.type))throw new Error('Photos only (JPG, PNG or WebP).');const path=await uploadFile('portfolio',file);const {error}=await sb.from('media_assets').insert({bucket:'portfolio',path,kind:'image',title:file.name.replace(/\.[^.]+$/,''),category:NM});if(error)throw error;ok++;msg(`Uploaded ${ok} of ${fs.length}…`)}catch(x){msg('Upload failed: '+(x.message||x),1)}}if(ok){await route();msg(ok+' photo(s) uploaded.')}};
+ const savePkg=async(row,quiet)=>{const id=row.dataset.pid,st=row.querySelector('.sv');
+    const g=f=>row.querySelector(`[data-f="${f}"]`),lines=t=>t.split('\n').map(x=>x.trim()).filter(Boolean),pr=g('price_ngn').value.trim();
+    const opts=lines(g('photo_options').value).map(l=>{const [lab,...r]=l.split('|'),n=Number(String(r.join('|')).replace(/[^\d.]/g,''));return{label:lab.trim(),price:n||0}}).filter(o=>o.label);
+    if(!g('name').value.trim()){if(st)st.textContent='Give the package a name to save it.';return}
+    if(st)st.textContent='Saving…';
+    const {error}=await sb.from('service_packages').update({name:g('name').value.trim(),price_ngn:pr===''?null:Number(pr),description:g('description').value.trim(),inclusions:lines(g('inclusions').value),photo_options:opts,featured:g('featured').checked,available:g('available').checked}).eq('id',id);
+    if(st)st.textContent=error?'Could not save: '+error.message:'Saved ✓ (shows on the website now)';if(error&&!quiet)msg('Could not save: '+error.message,1)};
+  const timers={};v.oninput=v.onchange=e=>{const row=e.target.closest&&e.target.closest('[data-pid]');if(!row)return;const st=row.querySelector('.sv');if(st)st.textContent='Saving soon…';clearTimeout(timers[row.dataset.pid]);timers[row.dataset.pid]=setTimeout(()=>savePkg(row,true),e.type==='change'?150:900)};
  v.onclick=async e=>{const b=e.target.closest('button[data-a]');if(!b)return;const a=b.dataset.a;
   if(a==='psave'||a==='pdel'){const row=b.closest('[data-pid]'),id=row.dataset.pid;
    if(a==='pdel'){if(!confirm('Delete this package permanently?'))return;const {error}=await sb.from('service_packages').delete().eq('id',id);error?msg(error.message,1):(await route(),msg('Deleted.'));return}
-   const g=f=>row.querySelector(`[data-f="${f}"]`),lines=t=>t.split('\n').map(x=>x.trim()).filter(Boolean),pr=g('price_ngn').value.trim();
-   const opts=lines(g('photo_options').value).map(l=>{const [lab,...r]=l.split('|'),n=Number(String(r.join('|')).replace(/[^\d.]/g,''));return{label:lab.trim(),price:n||0}}).filter(o=>o.label);
-   if(!g('name').value.trim())return msg('Give the package a name.',1);
-   const {error}=await sb.from('service_packages').update({name:g('name').value.trim(),price_ngn:pr===''?null:Number(pr),description:g('description').value.trim(),inclusions:lines(g('inclusions').value),photo_options:opts,featured:g('featured').checked,available:g('available').checked}).eq('id',id);
-   error?msg('Could not save: '+error.message,1):msg('Saved.')}
-  if(a==='mdel'){const id=b.closest('[data-mid]').dataset.mid,m=pics.find(x=>String(x.id)===id);if(!confirm('Delete this photo permanently?'))return;if(m.bucket)await sb.storage.from(m.bucket).remove([m.path]);const {error}=await sb.from('media_assets').delete().eq('id',id);error?msg(error.message,1):(await route(),msg('Deleted.'))}}}
+   await savePkg(row);msg('Saved.')}
+  if(a==='mdel'){const id=b.closest('[data-mid]').dataset.mid,m=pics.find(x=>String(x.id)===id);if(!m)return msg('That photo is already gone. Refresh the page.',1);if(!confirm('Delete this photo permanently?'))return;b.disabled=true;
+    try{const {data,error}=await sb.from('media_assets').delete().eq('id',m.id).select('id');if(error)throw error;if(!data||!data.length)throw new Error('The database refused to delete it (permission). Please sign out and in again.');
+     if(m.bucket&&m.path){try{await sb.storage.from(m.bucket).remove([m.path])}catch{}}
+     await route();msg('Deleted.')}catch(x){b.disabled=false;msg('Could not delete: '+(x.message||x),1)}}}}
 async function route(){navBadge();const [h,sub]=(location.hash||'#dashboard').slice(1).split('/');$$('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+h));
  $('#view').innerHTML='<p class="muted">Loading…</p>';const c=CFG[h];h==='graduation'?await graduationPage():h==='payments'?await paymentsPage():h==='galleries'?await galleriesPage(sub):h==='sendnews'?await sendNewsPage():h==='bookings'?await bookingsPage():h==='dashboard'||!c?await dash():c.forms?await settingsPage(c):await manager(c)}
 addEventListener('hashchange',route);
